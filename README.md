@@ -46,8 +46,11 @@ Este proyecto proporciona una interfaz web para probar y controlar una tarjeta c
 * Este proyecto está diseñado para facilitar las pruebas y el desarrollo con controladoras de hoppers de monedas.  Puede ser necesario adaptarlo o extenderlo para su uso en producción.
 
 ## Capturas de Pantalla
-_(Aquí podrías incluir capturas de pantalla de la interfaz de usuario)_
+![hopper_0](https://github.com/user-attachments/assets/de57c970-5a15-4357-a0a7-bce3862d70a5)
+![hoppers](https://github.com/user-attachments/assets/061255d5-9b39-4504-8560-ae208940cd4f)
+![hopper_2](https://github.com/user-attachments/assets/54d57436-2bc0-493d-b1bc-bc441d5b039f)
+
 
 ## Desarrollador
 
-_(Tu nombre o el nombre del equipo de desarrollo)_
+Akkudrak
