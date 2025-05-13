@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Probador de Puerto Serial</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    .fade-in {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <div class="container mx-auto p-4">
+    <h1 class="text-2xl font-bold mb-6">Probador Hopper Serial</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Columna Izquierda - Controles -->
+      <div class="space-y-6">
+        <!-- Contenedor de Saldos (inicialmente oculto) -->
+        <div id="balance-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 hidden fade-in">
+          <!-- Saldo Actual -->
+          <div id="current-balance" class="bg-white rounded-lg shadow p-4">
+            <div class="flex justify-between items-center mb-2">
+              <h2 class="text-lg font-semibold">Fondo para Cambio</h2>
+              <span class="text-xs text-gray-500" id="balance-timestamp"></span>
+            </div>
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-3xl font-bold text-blue-600" id="balance-amount">$0.00</div>
+                <div class="text-sm text-gray-500" id="balance-coins">0 monedas en total</div>
+              </div>
+              <div class="bg-blue-50 p-3 rounded-full">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="8" cy="8" r="7"></circle>
+                  <circle cx="16" cy="16" r="7"></circle>
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Segundo div similar -->
+          <div id="secondary-balance" class="bg-white rounded-lg shadow p-4">
+            <div class="flex justify-between items-center mb-2">
+              <h2 class="text-lg font-semibold">Monto Recaudado</h2>
+              <span class="text-xs text-gray-500" id="secondary-timestamp"></span>
+            </div>
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-3xl font-bold text-green-600" id="balance-collected">0</div>
+              </div>
+              <div class="bg-green-50 p-3 rounded-full">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-4">
+          <div class="mb-4">
+            <h2 class="text-lg font-semibold">Controles del Dispositivo</h2>
+            <p class="text-sm text-gray-500">Configurar y controlar el dispositivo serial</p>
+          </div>
+          
+          <div class="space-y-4">
+            <div class="flex items-end gap-2">
+              <button id="connect-btn" class="w-100 flex-1 px-4 py-2 bg-blue-600 content-center
+              text-white rounded-md items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M15 7h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-1"></path>
+                  <path d="M9 7H8a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h1"></path>
+                  <path d="M8 12h8"></path>
+                </svg>
+                Conectar
+              </button>
+            </div>
+            
+            <hr class="my-3">
+            
+            <div class="grid grid-cols-2 gap-2">
+              <button id="read-balance-btn" class="px-3 py-2 border border-gray-300 rounded-md flex items-center justify-center disabled:opacity-50" disabled>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                  <line x1="2" y1="10" x2="22" y2="10"></line>
+                </svg>
+                Leer Saldo
+              </button>
+              
+              <button id="get-status-btn" class="px-3 py-2 border border-gray-300 rounded-md flex items-center justify-center disabled:opacity-50" disabled>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 2v6h-6"></path>
+                  <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
+                  <path d="M3 12a9 9 0 0 0 15 6.7L21 16"></path>
+                  <path d="M21 22v-6h-6"></path>
+                </svg>
+                Obtener Estado
+              </button>
+              
+              <button id="clear-balance-btn" class="px-3 py-2 border border-gray-300 rounded-md flex items-center justify-center disabled:opacity-50" disabled>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 6h18"></path>
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                </svg>
+                Limpiar Saldo
+              </button>
+            </div>
+            
+            <div class="border rounded-md">
+              <div class="flex border-b">
+                <button class="tab-btn flex-1 py-2 px-3 text-center border-r border-gray-200 bg-gray-100 text-gray-800" data-tab="read">Leer Hopper</button>
+                <button class="tab-btn flex-1 py-2 px-3 text-center border-r border-gray-200" data-tab="write">Escribir Hopper</button>
+                <button class="tab-btn flex-1 py-2 px-3 text-center border-r border-gray-200" data-tab="dispense">Dispensar</button>
+                
+              </div>
+              
+              <div class="p-4">
+                <!-- Tab: Leer Hopper -->
+                <div id="tab-read" class="tab-content">
+                  <div class="flex items-end gap-2">
+                    <div class="flex-1">
+                      <select id="read-hopper-select" class="w-full px-3 py-2 border rounded-md">
+                        <option value="1">Hopper 1 (10 Pesos)</option>
+                        <option value="2">Hopper 2 (5 Pesos)</option>
+                        <option value="3">Hopper 3 (2 Pesos)</option>
+                        <option value="4">Hopper 4 (1 Peso)</option>
+                      </select>
+                    </div>
+                    <button id="read-hopper-btn" class="px-4 py-2 bg-blue-600 text-white rounded-md flex items-center disabled:opacity-50" disabled>
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                      </svg>
+                      Leer
+                    </button>
+                  </div>
+                </div>
+                
+                <!-- Tab: Escribir Hopper -->
+                <div id="tab-write" class="tab-content hidden">
+                  <div class="flex items-end gap-2">
+                    <div class="flex-1">
+                      <select id="write-hopper-select" class="w-full px-3 py-2 border rounded-md">
+                        <option value="1">Hopper 1 (10 Pesos)</option>
+                        <option value="2">Hopper 2 (5 Pesos)</option>
+                        <option value="3">Hopper 3 (2 Pesos)</option>
+                        <option value="4">Hopper 4 (1 Peso)</option>
+                      </select>
+                    </div>
+                    <div class="flex-1">
+                      <input id="write-hopper-value" type="number" class="w-full px-3 py-2 border rounded-md" placeholder="Valor" value="0">
+                    </div>
+                    <button id="write-hopper-btn" class="px-4 py-2 bg-blue-600 text-white rounded-md flex items-center disabled:opacity-50" disabled>
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 2L11 13"></path>
+                        <path d="M22 2l-7 20-4-9-9-4 20-7z"></path>
+                      </svg>
+                      Escribir
+                    </button>
+                  </div>
+                </div>
+                
+                <!-- Tab: Dispensar -->
+                <div id="tab-dispense" class="tab-content hidden">
+                  <div class="space-y-4">
+                    <div class="flex items-end gap-2">
+                      <div class="flex-1">
+                        <select id="dispense-hopper-select" class="w-full px-3 py-2 border rounded-md">
+                          <option value="1">Hopper 1 (10 Pesos)</option>
+                          <option value="2">Hopper 2 (5 Pesos)</option>
+                          <option value="3">Hopper 3 (2 Pesos)</option>
+                          <option value="4">Hopper 4 (1 Peso)</option>
+                        </select>
+                      </div>
+                      <button id="dispense-coin-btn" class="px-4 py-2 bg-blue-600 text-white rounded-md flex items-center disabled:opacity-50" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="8" cy="8" r="7"></circle>
+                          <circle cx="16" cy="16" r="7"></circle>
+                        </svg>
+                        Dispensar 1 Moneda
+                      </button>
+                    </div>
+                    
+                    <hr class="my-2">
+                    
+                    <div class="flex items-end gap-2">
+                      <div class="flex-1">
+                        <input id="change-amount" type="number" class="w-full px-3 py-2 border rounded-md" placeholder="Monto" value="0">
+                      </div>
+                      <button id="dispense-change-btn" class="px-4 py-2 bg-blue-600 text-white rounded-md flex items-center disabled:opacity-50" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="8" cy="8" r="7"></circle>
+                          <circle cx="16" cy="16" r="7"></circle>
+                        </svg>
+                        Entregar Cambio
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+               
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Hopper Status Graph (inicialmente oculto) -->
+        <div id="hopper-status" class="bg-white rounded-lg shadow p-4 hidden">
+          <div class="mb-4">
+            <h2 class="text-lg font-semibold">Estado de los Hoppers</h2>
+            <p class="text-sm text-gray-500">Saldo restante en cada hopper</p>
+          </div>
+          
+          <div class="space-y-6" id="hopper-status-content">
+            <!-- Contenido dinámico de los hoppers -->
+          </div>
+        </div>
+      </div>
+      
+      <!-- Columna Derecha - Mensajes -->
+      <div>
+        <div class="bg-white rounded-lg shadow">
+          <div class="p-4 border-b flex justify-between items-center">
+            <div>
+              <h2 class="text-lg font-semibold">Mensajes Seriales</h2>
+              <p class="text-sm text-gray-500">Mensajes enviados y recibidos</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span id="connection-status" class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">Desconectado</span>
+              <button id="clear-messages-btn" class="p-1 rounded-md border">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 6h18"></path>
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="p-4">
+            <div id="messages-container" class="h-[800px] overflow-y-auto pr-2">
+              <div id="no-messages" class="flex flex-col items-center justify-center h-full text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="4 17 10 11 4 5"></polyline>
+                  <line x1="12" y1="19" x2="20" y2="19"></line>
+                </svg>
+                <p>No hay mensajes aún</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="./serialConnection.js" type="module"></script>
+  <script src="./listeners.js"></script>
+
+
+
+</body>
+</html>
